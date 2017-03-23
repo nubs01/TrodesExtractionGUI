@@ -1,0 +1,21 @@
+Extraction Steps
+------------------
+Always Intro:
+if isempty(dir('*.rec'))
+  AnimalDir = selected_dir;
+  DayDirs = dir(AnimalDir);
+  DayDirs = DayDirs(directories that dont start in '.')
+else
+  AnimalDir = fileparts(selected_dir);
+  DayDirs = {selectedDir};
+end
+
+Fix Filenames
+  - preReqs: prefixes{}
+  - Intro: getPrefixes, setPrefixes
+  - Body: fn_mask = RN_fixFilenames([],prefixes{i});
+
+Order Rec Files
+  - preReqs: sortecRecFiles{}
+  - Intro: getRecOrder, setRecOrder
+  -
