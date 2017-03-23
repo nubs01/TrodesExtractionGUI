@@ -22,7 +22,7 @@ function varargout = RN_extractionTrodesConfGUI(varargin)
 
 % Edit the above text to modify the response to help RN_extractionTrodesConfGUI
 
-% Last Modified by GUIDE v2.5 09-Mar-2017 11:26:57
+% Last Modified by GUIDE v2.5 22-Mar-2017 22:14:14
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -185,13 +185,6 @@ function copy_push_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 pref = handles.output(get(handles.tet_pop,'Value'));
 
-% copyto = inputdlg('Copy to which tetrodes?','Copy To',1,{'All'});
-% if isempty(copyto) || strcmp(lower(copyto),'all')
-%     cpt = 1:numel(handles.output);
-% elsei
-    
-
-
 for i=1:numel(handles.output),
     id = handles.output(i).id;
     handles.output(i) = pref;
@@ -294,3 +287,42 @@ pref.thresh = val;
 handles.output(tet) = pref;
 updateFields(handles);
 guidata(hObject,handles);
+
+
+% --- Executes on button press in prev_push.
+function prev_push_Callback(hObject, eventdata, handles)
+% hObject    handle to prev_push (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+tv = get(handles.tet_pop','Value');
+if tv>1
+    set(handles.tet_pop,'Value',tv-1)
+end
+updateFields(handles)
+
+% --- Executes on button press in next_push.
+function next_push_Callback(hObject, eventdata, handles)
+% hObject    handle to next_push (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+tv = get(handles.tet_pop','Value');
+if tv<numel(handles.output)
+    set(handles.tet_pop,'Value',tv+1)
+end
+updateFields(handles)
+
+% --- Executes on button press in copyTo_push.
+function copyTo_push_Callback(hObject, eventdata, handles)
+% hObject    handle to copyTo_push (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+pref = handles.output(get(handles.tet_pop,'Value'));
+tets = handles.tets;
+idx = ListSelectGUI(tets,'Tets to Copy To:',1);
+for i=idx,
+    id = handles.output(i).id;
+    handles.output(i) = pref;
+    handles.output(i).id = id;
+end
+guidata(hObject,handles)
+
