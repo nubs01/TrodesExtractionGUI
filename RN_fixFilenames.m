@@ -1,4 +1,4 @@
-function common_prefix = RN_fixFilenames(dayDir,preFlg)
+function [new_preifx,common_prefix] = RN_fixFilenames(dayDir,preFlg)
 % RN_fixFilenames goes through all files in raw Trodes data dir (day
 % folder) and removes the .1. from filenames. It also changes
 % videoTimeStamps.cameraHWFrameCount to just .cameraHWFrameCount. Finally,
@@ -6,6 +6,8 @@ function common_prefix = RN_fixFilenames(dayDir,preFlg)
 % desire. If you have filenames containing .2. or .3. up to .9. they will
 % be changed to _2. or _3. etc.
 % RN_fixFilenames(dayDir,preflg)
+
+% Change directory if necessary
 cdFlg = 0;
 if exist('dayDir','var') && ~isempty(dayDir)
     currDir = pwd;
@@ -18,11 +20,12 @@ else
     dayDir = pwd;
     currDir = pwd;
 end
+
+% Get current common_preifx of rec files
 [~,dayName] = fileparts(dayDir);
 recFiles = dir('*.rec');
 recFiles = {recFiles.name}';
 if isempty(recFiles)
-    disp(['No Rec files found in ' pwd])
     if cdFlg
         cd(currDir)
     end
@@ -30,7 +33,11 @@ if isempty(recFiles)
 end
 common_prefix = RN_findCommonPrefix(recFiles);
 common_prefix = strrep(common_prefix,'.rec','');
-if ~exist('preFlg','var')
+new_prefix = '';
+
+% Determine if program will query for a new prefix, use a given prefix or
+% not change the prefix
+if ~exist('preFlg','var') || preFlg==1
     preFlg = 1;
 elseif ischar(preFlg)
     prefix = preFlg;
@@ -39,6 +46,8 @@ else
     prefix = common_prefix;
     preFlg = 0;
 end
+
+% Query user for prefix
 while preFlg || isempty(prefix)
     prefix = inputdlg({'Change common prefix from:','To:'},'Change File Prefixes',1,{common_prefix,dayName});
     if ~isempty(prefix)
@@ -56,6 +65,7 @@ while preFlg || isempty(prefix)
     end
 end
 
+% Loop through all files
 allFiles = dir('*.*');
 allFiles = {allFiles(~[allFiles.isdir]).name}';
 if isempty(allFiles)
@@ -67,6 +77,7 @@ end
 
 for i=1:numel(allFiles),
     fn = allFiles{i};
+    % Adjust Filename
     fn1 = fn;
     if ~isempty(strfind(fn1,'.1.'))
         fn1 = strrep(fn1,'.1.','.');
@@ -82,16 +93,18 @@ for i=1:numel(allFiles),
     if ~isempty(prefix)
         fn1 = strrep(fn1,common_prefix,prefix);
     end
+    % Change filename if needed
     if ~strcmp(fn,fn1)
         disp(['Changing filename ' fn ' to ' fn1])
         movefile(fn,fn1)
     end
 end
 
+% Get new common_prefix for output
 recFiles = dir('*.rec');
 recFiles = {recFiles.name}';
-common_prefix = RN_findCommonPrefix(recFiles);
-common_prefix = strrep(common_prefix,'.rec','');
+new_prefix = RN_findCommonPrefix(recFiles);
+new_prefix = strrep(new_prefix,'.rec','');
 
 if cdFlg
     cd(currDir);

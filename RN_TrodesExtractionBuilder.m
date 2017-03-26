@@ -54,12 +54,14 @@ function RN_TrodesExtractionBuilder_OpeningFcn(hObject, eventdata, handles, vara
 
 % Choose default command line output for RN_TrodesExtractionBuilder
 handles.output = hObject;
+handles.extractionPath = {};
+exKey = load('RN_extractionKey.mat');
+handles.extractionKey = exKey.extractionKey;
 
 % Update handles structure
 guidata(hObject, handles);
-
 % UIWAIT makes RN_TrodesExtractionBuilder wait for user response (see UIRESUME)
-uiwait(handles.figure1);
+% uiwait(handles.figure1);
 
 
 % --- Outputs from this function are returned to the command line.

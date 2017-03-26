@@ -58,6 +58,7 @@ handles.output = prefs;
 handles.fighandle = hObject;
 handles.origPrefs = prefs;
 handles.tets = {prefs.id}';
+handles.submit = 0;
 set(handles.tet_pop,'String',handles.tets)
 set(handles.lfp_pop,'String',{1,2,3,4})
 set(handles.refTet_pop,'String',handles.tets)
@@ -78,7 +79,7 @@ set(handles.refTet_pop,'Value',pref.refNTrode);
 set(handles.thresh_edit,'String',num2str(pref.thresh));
 
 % --- Outputs from this function are returned to the command line.
-function varargout = RN_extractionTrodesConfGUI_OutputFcn(hObject, eventdata, handles) 
+function varargout = RN_extractionTrodesConfGUI_OutputFcn(hObject, eventdata, handles)
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -86,6 +87,9 @@ function varargout = RN_extractionTrodesConfGUI_OutputFcn(hObject, eventdata, ha
 
 % Get default command line output from handles structure
 varargout{1} = handles.output;
+if ~handles.submit
+  varargout{1} = [];
+end
 delete(handles.fighandle);
 
 
@@ -219,6 +223,8 @@ function done_push_Callback(hObject, eventdata, handles)
 % hObject    handle to done_push (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+handles.submit = 1;
+guidata(hObject,handles);
 close(handles.figure1);
 
 
@@ -325,4 +331,3 @@ for i=idx,
     handles.output(i).id = id;
 end
 guidata(hObject,handles)
-

@@ -1,6 +1,8 @@
 Extraction Steps
 ------------------
 Always Intro:
+curr_dir = pwd;
+selected_dir = '';
 if isempty(dir('*.rec'))
   AnimalDir = selected_dir;
   DayDirs = dir(AnimalDir);
@@ -10,12 +12,32 @@ else
   DayDirs = {selectedDir};
 end
 
+
 Fix Filenames
   - preReqs: prefixes{}
   - Intro: getPrefixes, setPrefixes
   - Body: fn_mask = RN_fixFilenames([],prefixes{i});
 
-Order Rec Files
-  - preReqs: sortecRecFiles{}
+Order Rec Files (Required with TrodesComments and exports)
+  - preReqs: sortedRecFiles{}
   - Intro: getRecOrder, setRecOrder
-  -
+  - Body: sortedRecs = sortedRecFiles{i};
+
+Create Trodes Comments
+  - preReqs: sortedRecFiles{}
+  - Intro: getRecOrder, setRecOrder
+  - Body: RN_createTrodesComments(sortedRecFiles{i})
+
+Reconfigure (must occur before exports)
+  - preReqs: configs{}
+  - Intro: view and change config for each day, New or Existing or Clear
+  - Body: if isempty(configs{i}), commonFlg =''; else commonFlg = [' -reconfig ' configs{i}]; end
+
+Exports (dio,LFP,times,spikes,phy,mda)
+  - preReqs: sortedRecFiles{}, customFlg{i}, fn_mask
+  - Intro: getRecOrder, setRecOrder, setCustomFlg
+  - Body: if isempty(fn_mask)
+              fn_mask = RN_findCommonPrefix(sortedRecFiles{i});
+          end
+          commonFlg = [' -rec ' strjoin(sortedRecFiles,' -rec ') commonFlg ' -output ' fnMask];
+          RN_exportBinary(___,[commonFlg customFlg{i}])
