@@ -36,7 +36,7 @@ for i=1:numel(day_dirs),
     currStep = extractionSteps{j};
 
     % Get common_prefix
-    recFiles = dir([day_dirs{i} '*.rec']);
+    recFiles = dir([day_dirs{i} '*.rec']) ;
     recFiles = {recFiles.name}';
     common_prefix = RN_findCommonPrefix(recFiles);
     common_prefix = strrep(common_prefix,'.rec','');

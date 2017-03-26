@@ -1,38 +1,42 @@
-function varargout = OrderListGUI(varargin)
-% ORDERLISTGUI MATLAB code for OrderListGUI.fig
-%      SortedList = OrderListGUI(unsortedList) brings up a gui that allows
+function varargout = ListGUI(varargin)
+% LISTGUI MATLAB code for ListGUI.fig
+%      SortedList = ListGUI(unsortedList) brings up a gui that allows
 %      the user to sort a list
+%      
+%      SortedList = ListGUI(unsortedList,title,addType) sets the title of
+%      the GUI and specifying an addType ('file' or 'string') allows
+%      addition and removal of items from the list
 %
-%      ORDERLISTGUI, by itself, creates a new ORDERLISTGUI or raises the existing
+%      LISTGUI, by itself, creates a new LISTGUI or raises the existing
 %      singleton*.
 %
-%      H = ORDERLISTGUI returns the handle to a new ORDERLISTGUI or the handle to
+%      H = LISTGUI returns the handle to a new LISTGUI or the handle to
 %      the existing singleton*.
 %
-%      ORDERLISTGUI('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in ORDERLISTGUI.M with the given input arguments.
+%      LISTGUI('CALLBACK',hObject,eventData,handles,...) calls the local
+%      function named CALLBACK in LISTGUI.M with the given input arguments.
 %
-%      ORDERLISTGUI('Property','Value',...) creates a new ORDERLISTGUI or raises the
+%      LISTGUI('Property','Value',...) creates a new LISTGUI or raises the
 %      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before OrderListGUI_OpeningFcn gets called.  An
+%      applied to the GUI before ListGUI_OpeningFcn gets called.  An
 %      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to OrderListGUI_OpeningFcn via varargin.
+%      stop.  All inputs are passed to ListGUI_OpeningFcn via varargin.
 %
 %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
 %      instance to run (singleton)".
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
-% Edit the above text to modify the response to help OrderListGUI
+% Edit the above text to modify the response to help ListGUI
 
-% Last Modified by GUIDE v2.5 08-Mar-2017 21:39:20
+% Last Modified by GUIDE v2.5 26-Mar-2017 11:51:06
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
                    'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @OrderListGUI_OpeningFcn, ...
-                   'gui_OutputFcn',  @OrderListGUI_OutputFcn, ...
+                   'gui_OpeningFcn', @ListGUI_OpeningFcn, ...
+                   'gui_OutputFcn',  @ListGUI_OutputFcn, ...
                    'gui_LayoutFcn',  [] , ...
                    'gui_Callback',   []);
 if nargin && ischar(varargin{1})
@@ -47,31 +51,81 @@ end
 % End initialization code - DO NOT EDIT
 
 
-% --- Executes just before OrderListGUI is made visible.
-function OrderListGUI_OpeningFcn(hObject, eventdata, handles, varargin)
+% --- Executes just before ListGUI is made visible.
+function ListGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 % This function has no output args, see OutputFcn.
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to OrderListGUI (see VARARGIN)
+% varargin   command line arguments to ListGUI (see VARARGIN)
 
-% Choose default command line output for OrderListGUI
+% Choose default command line output for ListGUI
 handles.figHandle = hObject;
 handles.output = varargin{1};
 handles.origList = varargin{1};
 updateList(handles);
+
+if numel(varargin)>1
+    set(handles.title_text,'String',varargin{2})
+end
+if numel(varargin)>2
+    add_type = lower(varargin{3});
+    switch add_type
+        case 'file'
+        case 'string'
+        otherwise
+            error('add_type must be either ''file'' or ''string''');
+    end
+    set(handles.add_push,'Visible','On','Enable','On')
+    set(handles.remove_push,'Visible','On','Enable','On')
+    handles.add_type = add_type;
+end
+
 % Update handles structure
 guidata(hObject, handles);
 
-% UIWAIT makes OrderListGUI wait for user response (see UIRESUME)
+% UIWAIT makes ListGUI wait for user response (see UIRESUME)
 uiwait(handles.figure1);
 
 %Re-displays the list in its current order
 function updateList(handles)
-set(handles.list_box,'String',char(handles.output))
+loc = get(handles.list_box,'Value');
+list = handles.output;
+set(handles.list_box,'Units','char')
+len = get(handles.list_box,'Position');
+len = len(3)-1;
+sizes = cellfun(@(x) numel(x),list);
+if any(sizes>=len)
+    for i=find(sizes>=len),
+        a = list{i};
+        if strcmp(handles.add_type,'file')
+            [~,c] = fileparts(a);
+            b = ['/.../' shortenStr(c,len-4)];
+            
+        else
+            b = shortenStr(a,len);
+        end
+        list{i} = b;
+    end
+end
+set(handles.list_box,'String',char(list))
+if loc>numel(handles.output)
+    set(handles.list_box,'Value',numel(handles.output))
+end
+
+function out = shortenStr(str,N)
+% N must be greater than or equal to 3
+if numel(str)<N
+    out = str;
+    return;
+end
+d = numel(str)-N + 3;
+i1 = fix(numel(str)/2)-ceil(d/2)+2;
+out = strrep(str,str(i1:i1+d-1),'...');
+
 
 % --- Outputs from this function are returned to the command line.
-function varargout = OrderListGUI_OutputFcn(hObject, eventdata, handles) 
+function varargout = ListGUI_OutputFcn(hObject, eventdata, handles) 
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -80,16 +134,6 @@ function varargout = OrderListGUI_OutputFcn(hObject, eventdata, handles)
 % Get default command line output from handles structure
 varargout{1} = handles.output;
 delete(handles.figHandle);
-
-
-% --- Executes on selection change in list_box.
-function list_box_Callback(hObject, eventdata, handles)
-% hObject    handle to list_box (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns list_box contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from list_box
 
 
 % --- Executes during object creation, after setting all properties.
@@ -118,6 +162,7 @@ if n>1
     list{n-1} = tmp;
     handles.output = list;
     updateList(handles)
+    set(handles.list_box,'Value',n-1);
     guidata(hObject,handles)
 end
 
@@ -135,6 +180,7 @@ if n<numel(list)
     list{n+1} = tmp;
     handles.output = list;
     updateList(handles)
+    set(handles.list_box,'Value',n+1)
     guidata(hObject,handles)
 end
 
@@ -145,6 +191,7 @@ function cancel_push_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles.output = handles.origList;
+updateList(handles);
 guidata(hObject,handles);
 close(handles.figure1);
 
@@ -168,3 +215,46 @@ if isequal(get(hObject, 'waitstatus'), 'waiting')
 else
     delete(hObject);
 end
+
+
+% --- Executes on button press in remove_push.
+function remove_push_Callback(hObject, eventdata, handles)
+% hObject    handle to remove_push (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+list = handles.output;
+if isempty(list)
+    return;
+end
+n = get(handles.list_box,'Value');
+list(n) = [];
+handles.output = list;
+updateList(handles);
+guidata(hObject,handles);
+
+
+% --- Executes on button press in add_push.
+function add_push_Callback(hObject, eventdata, handles)
+% hObject    handle to add_push (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+txt = '';
+switch handles.add_type
+    case 'file'
+        [fn,dir] = uigetfile([pwd filesep '.*']);
+        if ischar(fn)
+            txt = [dir fn];
+        end
+    case 'string'
+        txt = inputdlg('New List Item:','Add Item');
+        if ~isempty(txt)
+            txt = txt{1};
+        else
+            txt = '';
+        end
+end
+if ~isempty(txt)
+    handles.output{end+1} = txt;
+end
+updateList(handles)
+guidata(hObject,handles)
