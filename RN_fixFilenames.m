@@ -1,4 +1,4 @@
-function [new_preifx,common_prefix] = RN_fixFilenames(dayDir,preFlg)
+function [new_prefix,common_prefix] = RN_fixFilenames(dayDir,preFlg)
 % RN_fixFilenames goes through all files in raw Trodes data dir (day
 % folder) and removes the .1. from filenames. It also changes
 % videoTimeStamps.cameraHWFrameCount to just .cameraHWFrameCount. Finally,
@@ -21,6 +21,9 @@ else
     currDir = pwd;
 end
 
+new_prefix = '';
+common_prefix='';
+
 % Get current common_preifx of rec files
 [~,dayName] = fileparts(dayDir);
 recFiles = dir('*.rec');
@@ -33,7 +36,6 @@ if isempty(recFiles)
 end
 common_prefix = RN_findCommonPrefix(recFiles);
 common_prefix = strrep(common_prefix,'.rec','');
-new_prefix = '';
 
 % Determine if program will query for a new prefix, use a given prefix or
 % not change the prefix
