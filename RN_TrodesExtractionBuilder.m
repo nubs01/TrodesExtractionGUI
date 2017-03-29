@@ -22,7 +22,7 @@ function varargout = RN_TrodesExtractionBuilder(varargin)
 
 % Edit the above text to modify the response to help RN_TrodesExtractionBuilder
 
-% Last Modified by GUIDE v2.5 15-Mar-2017 21:49:53
+% Last Modified by GUIDE v2.5 29-Mar-2017 00:06:51
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -55,8 +55,9 @@ function RN_TrodesExtractionBuilder_OpeningFcn(hObject, eventdata, handles, vara
 % Choose default command line output for RN_TrodesExtractionBuilder
 handles.output = hObject;
 handles.extractionPath = {};
-exKey = load('RN_extractionKey.mat');
-handles.extractionKey = exKey.extractionKey;
+setappdata(handles.output,'saved',1)
+setappdata(handles.output,'saveFile','')
+handles.saveFile = '';
 
 % Update handles structure
 guidata(hObject, handles);
@@ -93,6 +94,17 @@ function up_push_Callback(hObject, eventdata, handles)
 % hObject    handle to up_push (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+list = handles.extractionPath;
+n = get(handles.extraction_list,'Value');
+if n==1
+    return;
+end
+tmp = list{n};
+list{n} = list{n-1};
+list{n-1} = tmp;
+handles.extractionPath = list;
+set(handles.extraction_list,'String',list,'Value',n-1)
+guidata(hObject,handles)
 
 
 % --- Executes on button press in down_push.
@@ -100,6 +112,18 @@ function down_push_Callback(hObject, eventdata, handles)
 % hObject    handle to down_push (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+list = handles.extractionPath;
+disp('derp')
+n = get(handles.extraction_list,'Value');
+if n<numel(list)
+    return;
+end
+tmp = list{n};
+list{n} = list{n+1};
+list{n+1} = tmp;
+handles.extractionPath = list;
+set(handles.extraction_list,'String',list,'Value',n+1)
+guidata(hObject,handles)
 
 
 % --- Executes on button press in delete_push.
@@ -107,70 +131,31 @@ function delete_push_Callback(hObject, eventdata, handles)
 % hObject    handle to delete_push (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+list = handles.extractionPath;
+if isempty(list)
+    return;
+end
+n = get(handles.extraction_list,'Value');
+if n==numel(list)
+    set(handles.extraction_list,'Value',n-1)
+end
+list(n) = [];
+handles.extractionPath = list;
+set(handles.extraction_list,'String',list)
+guidata(hObject,handles)
 
-
-% --- Executes on button press in fixFile_push.
-function fixFile_push_Callback(hObject, eventdata, handles)
-% hObject    handle to fixFile_push (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --- Executes on button press in trodesComment_push.
-function trodesComment_push_Callback(hObject, eventdata, handles)
-% hObject    handle to trodesComment_push (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --- Executes on button press in pushbutton6.
-function pushbutton6_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton6 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --- Executes on button press in exSpike_push.
-function exSpike_push_Callback(hObject, eventdata, handles)
-% hObject    handle to exSpike_push (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --- Executes on button press in exLFP_push.
-function exLFP_push_Callback(hObject, eventdata, handles)
-% hObject    handle to exLFP_push (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --- Executes on button press in exTime_push.
-function exTime_push_Callback(hObject, eventdata, handles)
+% --- Executes on button press of any left side pushbutton.
+function add_push_Callback(hObject, eventdata, handles)
 % hObject    handle to exTime_push (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-
-% --- Executes on button press in exDIO_push.
-function exDIO_push_Callback(hObject, eventdata, handles)
-% hObject    handle to exDIO_push (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --- Executes on button press in exMDA_push.
-function exMDA_push_Callback(hObject, eventdata, handles)
-% hObject    handle to exMDA_push (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --- Executes on button press in exPhy_push.
-function exPhy_push_Callback(hObject, eventdata, handles)
-% hObject    handle to exPhy_push (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
+setappdata(handles.output,'saved',0)
+handles.extractionPath{end+1} = get(hObject,'String');
+set(handles.extraction_list,'String',handles.extractionPath)
+if numel(handles.extractionPath)<=1
+    set(handles.extraction_list,'Value',1)
+end
+guidata(hObject,handles)
 
 % --- Executes on button press in run_push.
 function run_push_Callback(hObject, eventdata, handles)
@@ -205,17 +190,99 @@ function new_menu_Callback(hObject, eventdata, handles)
 % hObject    handle to new_menu (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+if getappdata(handles.output,'saved')
+    handles.extractionPath = {};
+    set(handles.extraction_list,'String',extractionPath)
+    setappdata(handles.output,'saved',1)
+else
+    q = questdlg('Current path is unsaved, if you continue script will be lost. Continue?','Unsaved Changes','Yes','No','No');
+    if strcmp(q,'No')
+        return;
+    else
+        handles.extractionPath = {};
+        set(handles.extraction_list,'String',extractionPath)
+        setappdata(handles.output,'saved',1)
+    end
+end
+guidata(hObject,handles);
 
 % --------------------------------------------------------------------
 function open_menu_Callback(hObject, eventdata, handles)
 % hObject    handle to open_menu (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+if getappdata(handles.output,'saved')
+    handles.extractionPath = {};
 
+    [sf,sd] = uigetfile('*.trexpath','Open File');
+    if ~sf
+        return;
+    end
+    sf = [sd sf];
+    fid = fopen(sf,'r');
+    B = {};
+    c = fgetl(fid);
+    while c~=-1
+        B{end+1} = c;
+        c = fgetl(fid);
+    end
+    fclose(fid)
+    handles.extractionPath = B';
+    setappdata(handles.output,'saveFile',sf)
+    set(handles.extraction_list,'String',handles.extractionPath)
+    setappdata(handles.output,'saved',1)
+else
+    q = questdlg('Current path is unsaved, if you continue script will be lost. Continue?','Unsaved Changes','Yes','No','No');
+    if strcmp(q,'No')
+        return;
+    else
+        setappdata(handles.output,'saved',1);
+        open_menu_Callback(hObject,eventdata,handles);
+    end
+end
+guidata(hObject,handles);
 
 % --------------------------------------------------------------------
 function save_menu_Callback(hObject, eventdata, handles)
 % hObject    handle to save_menu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+sf = getappdata(handles.output,'saveFile');
+if isempty(sf)
+    [sf,sd] = uiputfile('*.trexpath','Save File');
+    if ~sf
+        return;
+    end
+    sf = [sd sf];
+end
+fid = fopen(sf,'w');
+expath = handles.extractionPath;
+for i=1:numel(expath),
+    fprintf(fid,'%s\n',expath{i});
+end
+fclose(fid);
+setappdata(handles.output,'saveFile',sf)
+setappdata(handles.output,'saved',1)
+
+
+% --------------------------------------------------------------------
+function script_export_menu_Callback(hObject, eventdata, handles)
+% hObject    handle to script_export_menu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function saveas_menu_Callback(hObject, eventdata, handles)
+% hObject    handle to saveas_menu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+setappdata(handles.output,'saveFile','')
+save_menu_Callback(hObject,eventdata,handles)
+
+
+% --------------------------------------------------------------------
+function newconfig_menu_Callback(hObject, eventdata, handles)
+% hObject    handle to newconfig_menu (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)

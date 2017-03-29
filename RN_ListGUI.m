@@ -1,33 +1,33 @@
-function varargout = ListGUI(varargin)
-% LISTGUI MATLAB code for ListGUI.fig
-%      SortedList = ListGUI(unsortedList) brings up a gui that allows
+function varargout = RN_ListGUI(varargin)
+% RN_ListGUI MATLAB code for RN_ListGUI.fig
+%      SortedList = RN_ListGUI(unsortedList) brings up a gui that allows
 %      the user to sort a list
-%      
-%      SortedList = ListGUI(unsortedList,title,addType) sets the title of
+%
+%      SortedList = RN_ListGUI(unsortedList,title,addType) sets the title of
 %      the GUI and specifying an addType ('file' or 'string') allows
 %      addition and removal of items from the list
 %
-%      LISTGUI, by itself, creates a new LISTGUI or raises the existing
+%      RN_ListGUI, by itself, creates a new RN_ListGUI or raises the existing
 %      singleton*.
 %
-%      H = LISTGUI returns the handle to a new LISTGUI or the handle to
+%      H = RN_ListGUI returns the handle to a new RN_ListGUI or the handle to
 %      the existing singleton*.
 %
-%      LISTGUI('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in LISTGUI.M with the given input arguments.
+%      RN_ListGUI('CALLBACK',hObject,eventData,handles,...) calls the local
+%      function named CALLBACK in RN_ListGUI.M with the given input arguments.
 %
-%      LISTGUI('Property','Value',...) creates a new LISTGUI or raises the
+%      RN_ListGUI('Property','Value',...) creates a new RN_ListGUI or raises the
 %      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before ListGUI_OpeningFcn gets called.  An
+%      applied to the GUI before RN_ListGUI_OpeningFcn gets called.  An
 %      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to ListGUI_OpeningFcn via varargin.
+%      stop.  All inputs are passed to RN_ListGUI_OpeningFcn via varargin.
 %
 %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
 %      instance to run (singleton)".
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
-% Edit the above text to modify the response to help ListGUI
+% Edit the above text to modify the response to help RN_ListGUI
 
 % Last Modified by GUIDE v2.5 26-Mar-2017 11:51:06
 
@@ -35,8 +35,8 @@ function varargout = ListGUI(varargin)
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
                    'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @ListGUI_OpeningFcn, ...
-                   'gui_OutputFcn',  @ListGUI_OutputFcn, ...
+                   'gui_OpeningFcn', @RN_ListGUI_OpeningFcn, ...
+                   'gui_OutputFcn',  @RN_ListGUI_OutputFcn, ...
                    'gui_LayoutFcn',  [] , ...
                    'gui_Callback',   []);
 if nargin && ischar(varargin{1})
@@ -51,15 +51,15 @@ end
 % End initialization code - DO NOT EDIT
 
 
-% --- Executes just before ListGUI is made visible.
-function ListGUI_OpeningFcn(hObject, eventdata, handles, varargin)
+% --- Executes just before RN_ListGUI is made visible.
+function RN_ListGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 % This function has no output args, see OutputFcn.
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to ListGUI (see VARARGIN)
+% varargin   command line arguments to RN_ListGUI (see VARARGIN)
 
-% Choose default command line output for ListGUI
+% Choose default command line output for RN_ListGUI
 handles.figHandle = hObject;
 handles.output = varargin{1};
 handles.origList = varargin{1};
@@ -84,7 +84,7 @@ end
 % Update handles structure
 guidata(hObject, handles);
 
-% UIWAIT makes ListGUI wait for user response (see UIRESUME)
+% UIWAIT makes RN_ListGUI wait for user response (see UIRESUME)
 uiwait(handles.figure1);
 
 %Re-displays the list in its current order
@@ -101,14 +101,14 @@ if any(sizes>=len)
         if strcmp(handles.add_type,'file')
             [~,c] = fileparts(a);
             b = ['/.../' shortenStr(c,len-4)];
-            
+
         else
             b = shortenStr(a,len);
         end
         list{i} = b;
     end
 end
-set(handles.list_box,'String',char(list))
+set(handles.list_box,'String',list)
 if loc>numel(handles.output)
     set(handles.list_box,'Value',numel(handles.output))
 end
@@ -125,7 +125,7 @@ out = strrep(str,str(i1:i1+d-1),'...');
 
 
 % --- Outputs from this function are returned to the command line.
-function varargout = ListGUI_OutputFcn(hObject, eventdata, handles) 
+function varargout = RN_ListGUI_OutputFcn(hObject, eventdata, handles)
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
