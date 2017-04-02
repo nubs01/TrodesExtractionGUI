@@ -27,11 +27,11 @@ function varargout = RN_extractionSetupGUI(varargin)
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
-                   'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @RN_extractionSetupGUI_OpeningFcn, ...
-                   'gui_OutputFcn',  @RN_extractionSetupGUI_OutputFcn, ...
-                   'gui_LayoutFcn',  [] , ...
-                   'gui_Callback',   []);
+    'gui_Singleton',  gui_Singleton, ...
+    'gui_OpeningFcn', @RN_extractionSetupGUI_OpeningFcn, ...
+    'gui_OutputFcn',  @RN_extractionSetupGUI_OutputFcn, ...
+    'gui_LayoutFcn',  [] , ...
+    'gui_Callback',   []);
 if nargin && ischar(varargin{1})
     gui_State.gui_Callback = str2func(varargin{1});
 end
@@ -59,13 +59,13 @@ exDat = varargin{2};
 dayNames = {exDat.day_name};
 animalNames = {exDat.animal_name};
 [~,idx] = sort(animalNames);
-animalList = animalNames(idx);
+animalNames = animalNames(idx);
 dayNames = dayNames(idx);
 exDat = exDat(idx);
 dayList = {};
 dayIdx = zeros(numel(dayNames),1);
 prevAnim = '';
-for i=1:nume(dayNames),
+for i=1:numel(dayNames),
     a = animalNames{i};
     if ~strcmp(a,prevAnim)
         prevAnim = a;
@@ -76,9 +76,9 @@ for i=1:nume(dayNames),
 end
 setappdata(handles.output,'dayIdx',dayIdx)
 setappdata(handles.output,'ExDat',exDat)
-set(handles.day_list,'String',dayList,'Value',2)
-allExTypes = {'Spikes','LFP','Times','DIO','MDA','Phy'};
-setappdata(hanles.output,'allExportTypes',allExTypes)
+set(handles.dir_list,'String',dayList,'Value',2)
+allExTypes = {'Spikes','LFP','Time','DIO','MDA','Phy'};
+setappdata(handles.output,'allExportTypes',allExTypes)
 setappdata(handles.output,'origDat',exDat)
 handles.i = 1;
 handles.submit = 0;
@@ -99,9 +99,9 @@ function varargout = RN_extractionSetupGUI_OutputFcn(hObject, eventdata, handles
 % handles    structure with handles and user data (see GUIDATA)
 
 % Get default command line output from handles structure
-if handle.confirm
+if handles.submit
     out = getappdata(handles.output,'ExDat');
-    out2 = str2double(get(handles.parallel_text,'String'));
+    out2 = str2double(get(handles.parallel_edit,'String'));
 else
     out = [];
     out2 = [];
@@ -126,7 +126,7 @@ exText = {};
 exportTypes = getappdata(handles.output,'allExportTypes');
 
 for j=1:numel(ExPath),
-    exItem = ExPath(j);
+    exItem = ExPath{j};
     switch exItem
         case 'Fix Filenames'
             set(handles.prefix_text,'String',['Prefix: ' ed.prefix])
@@ -139,26 +139,35 @@ for j=1:numel(ExPath),
             set(handles.prefix_panel,'Visible','On')
         otherwise
             [a,b] = strtok(exItem);
+            % Display export flags
             if strcmp(a,'Export')
                 set(handles.config_panel,'Visible','On')
-                if isempty(ed.config)
-                set(handles.config_text,['Config: ' ed.config])
+                if ~isempty(ed.config)
+                    set(handles.config_text,'String',['Config: ' ed.config])
                 else
-                    set(handles.config_text,'Config: Default')
+                    set(handles.config_text,'String','Config: Default')
                 end
                 set(handles.export_panel,'Visible','On')
                 set(handles.prefix_panel,'Visible','On')
                 set(handles.prefix_text,'String',['Prefix: ' ed.prefix])
                 b = strtrim(b);
-                exIdx = find(strcmp(exportTypes,b));
-                exText = [exText;b;ed.export_flgs{exIdx};''];
+                exIdx = find(strcmpi(exportTypes,b));
+                k = ed.export_flags{exIdx};
+                b = [b ':'];
+                if isempty(k)
+                    exText = [exText b];
+                else
+                    exText = [exText b k];
+                end
+                exText{end+1} = '';
             end
     end
 end
 if ~any(strcmp(ExPath,'Fix Filenames'))
+    set(handles.prefix_text,'String',['Prefix: ' ed.prefix])
     set(handles.change_pre_push,'Visible','off')
 end
-set(handles.export_text,'String',exText);
+set(handles.export_text,'String',char(exText));
 
 
 % --- Executes on selection change in dir_list.
@@ -171,6 +180,8 @@ i = get(hObject,'Value');
 if ~any(dayIdx==i)
     i = find(dayIdx>i,1,'first');
     set(hObject,'Value',dayIdx(i))
+else
+    i = find(dayIdx==i);
 end
 handles.i = i;
 updateGUI(handles);
@@ -203,7 +214,7 @@ function submit_push_Callback(hObject, eventdata, handles)
 % hObject    handle to submit_push (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-handles.confirm = 1;
+handles.submit = 1;
 guidata(hObject,handles)
 close(handles.figure1);
 
@@ -280,7 +291,7 @@ function change_conf_push_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 i = handles.i;
 exDat = getappdata(handles.output,'ExDat');
-q1 = questdlg('Create new config or choose existing?','New','Existing','Cancel','Cancel');
+q1 = questdlg('Create new config or choose existing?','Change Config File','New','Existing','Cancel','Cancel');
 switch q1
     case 'New'
         cf = RN_customizeTrodesConfig();
@@ -304,7 +315,7 @@ function parallel_edit_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of parallel_edit as text
 %        str2double(get(hObject,'String')) returns contents of parallel_edit as a double
-if isempty(str2double(get(handles.parallel_text,'String')))
+if isempty(str2double(get(handles.parallel_edit,'String')))
     h = msgbox('Choose a valid number.','Invalid Input');
     waitfor(h);
     set(hObject,'String','8')
@@ -335,11 +346,12 @@ allExTypes = getappdata(handles.output,'allExportTypes');
 exPath = getappdata(handles.output,'ExPath');
 exDat = getappdata(handles.output,'ExDat');
 [a,b] = strtok(exPath,' ');
-exIdx = strcmp(a,'Export');
+exIdx = strcmpi(a,'Export');
 exTs = strtrim(b(exIdx));
-allExIdx = zeros(1,numel(allExTypes));
-for i=1:numel(allExTypes),
-    allExIdx(i) = find(strcmp(lower(allExTypes),lower(exTs{i})));
+allExIdx = zeros(1,numel(exTs));
+for j=1:numel(exTs),
+    k = find(strcmpi(allExTypes,exTs{j}));
+    allExIdx(j) = k;
 end
 
 
@@ -350,10 +362,11 @@ if isempty(As)
     return;
 end
 exFlags(allExIdx) = As;
-exDat(i) = exFlags;
+exDat(i).export_flags = exFlags;
 setappdata(handles.output,'ExDat',exDat)
-updateGUI(handles)
 guidata(hObject,handles)
+updateGUI(handles)
+
 
 
 

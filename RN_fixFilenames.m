@@ -39,7 +39,7 @@ common_prefix = strrep(common_prefix,'.rec','');
 
 % Determine if program will query for a new prefix, use a given prefix or
 % not change the prefix
-if ~exist('preFlg','var') || preFlg==1
+if ~exist('preFlg','var') || all(preFlg==1)
     preFlg = 1;
 elseif ischar(preFlg)
     prefix = preFlg;
