@@ -93,3 +93,4 @@ for i=1:nDays,
         disp(['Exporting ' exportTypes{j} '...'])
         RN_exportBinary(exportTypes{j},[commonFlag ' ' exportFlgs{j}])
     end
+end

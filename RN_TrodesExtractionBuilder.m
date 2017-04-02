@@ -96,9 +96,10 @@ function up_push_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 list = handles.extractionPath;
 n = get(handles.extraction_list,'Value');
-if n==1
+if n==1 || isempty(list)
     return;
 end
+setappdata(handles.output,'saved',0)
 tmp = list{n};
 list{n} = list{n-1};
 list{n-1} = tmp;
@@ -113,11 +114,11 @@ function down_push_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 list = handles.extractionPath;
-disp('derp')
 n = get(handles.extraction_list,'Value');
-if n<numel(list)
+if n==numel(list) || isempty(list)
     return;
 end
+setappdata(handles.output,'saved',0)
 tmp = list{n};
 list{n} = list{n+1};
 list{n+1} = tmp;
@@ -135,6 +136,7 @@ list = handles.extractionPath;
 if isempty(list)
     return;
 end
+setappdata(handles.output,'saved',0)
 n = get(handles.extraction_list,'Value');
 if n==numel(list)
     set(handles.extraction_list,'Value',n-1)
@@ -162,6 +164,8 @@ function run_push_Callback(hObject, eventdata, handles)
 % hObject    handle to run_push (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+exPath = handles.extractionPath;
+logs = RN_runTREXpath(exPath);
 
 
 % --------------------------------------------------------------------
@@ -194,6 +198,7 @@ if getappdata(handles.output,'saved')
     handles.extractionPath = {};
     set(handles.extraction_list,'String',extractionPath)
     setappdata(handles.output,'saved',1)
+ set(handles.saveFile_text,'String','');
 else
     q = questdlg('Current path is unsaved, if you continue script will be lost. Continue?','Unsaved Changes','Yes','No','No');
     if strcmp(q,'No')
@@ -226,21 +231,23 @@ if getappdata(handles.output,'saved')
         B{end+1} = c;
         c = fgetl(fid);
     end
-    fclose(fid)
+    fclose(fid);
     handles.extractionPath = B';
     setappdata(handles.output,'saveFile',sf)
     set(handles.extraction_list,'String',handles.extractionPath)
     setappdata(handles.output,'saved',1)
+    set(handles.saveFile_text,'String',sf);
+    guidata(hObject,handles)
 else
     q = questdlg('Current path is unsaved, if you continue script will be lost. Continue?','Unsaved Changes','Yes','No','No');
     if strcmp(q,'No')
         return;
     else
         setappdata(handles.output,'saved',1);
+        guidata(hObject,handles);
         open_menu_Callback(hObject,eventdata,handles);
     end
 end
-guidata(hObject,handles);
 
 % --------------------------------------------------------------------
 function save_menu_Callback(hObject, eventdata, handles)
@@ -263,6 +270,7 @@ end
 fclose(fid);
 setappdata(handles.output,'saveFile',sf)
 setappdata(handles.output,'saved',1)
+set(handles.saveFile_text,'String',sf);
 
 
 % --------------------------------------------------------------------
@@ -286,3 +294,4 @@ function newconfig_menu_Callback(hObject, eventdata, handles)
 % hObject    handle to newconfig_menu (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+cf = RN_customizeTrodesConfig();

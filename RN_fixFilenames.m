@@ -95,6 +95,9 @@ for i=1:numel(allFiles),
     if ~isempty(prefix)
         fn1 = strrep(fn1,common_prefix,prefix);
     end
+
+    fn1 = strrep(fn1,' ','_');
+    
     % Change filename if needed
     if ~strcmp(fn,fn1)
         disp(['Changing filename ' fn ' to ' fn1])
