@@ -196,7 +196,7 @@ function new_menu_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 if getappdata(handles.output,'saved')
     handles.extractionPath = {};
-    set(handles.extraction_list,'String',extractionPath)
+    set(handles.extraction_list,'String',handles.extractionPath)
     setappdata(handles.output,'saved',1)
  set(handles.saveFile_text,'String','');
 else

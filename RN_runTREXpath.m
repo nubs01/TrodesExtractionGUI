@@ -173,7 +173,7 @@ for i=1:N,
                 % #MATCLUST
                 disp('Generating Matclust Files...')
                 outDir = RN_generateMatclusts(maxJobs);
-                disp(['Matclust file saved to ' outDir])
+%                 disp(['Matclust file saved to ' outDir])
         end
     end
     cd(curr_dir);
