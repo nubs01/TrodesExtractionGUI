@@ -1,0 +1,163 @@
+exportLFP
+--------------------------------------------------------
+Used to extract LFP data from a raw rec file and save to individual files. 
+Usage:  exportLFP -rec INPUTFILENAME OPTION1 VALUE1 OPTION2 VALUE2 ...  
+
+Input arguments 
+Defaults:
+ -outputrate 1500 
+ -highpass 0 
+ -lowpass 400 
+ -interp -1 (inf) 
+ -userefs 0 
+-oneperntrode <0 or 1> -- if 1 (default) only the LFP channel is used for each ntrode. Otherwise all channels are exported.
+
+-rec <filename>  -- Recording filename. Required. Muliple -rec <filename> entries can be used to append data in output.
+-v or -version -- Prints the current executable's version information to the terminal. 
+-highpass <integer> -- High pass filter value. Overrides settings in file. 
+-lowpass <integer> -- Low pass filter value. Overrides settings in file.
+-outputrate <integer> -- Define the output sampling rate in the output file(s).
+-interp <integer> -- Maximum number of dropped packets to interpolate. 
+-userefs <1 or 0> -- Whether or not to subtract digital references.
+-usespikefilters <1 or 0> -- Whether or not to apply the spike filter settings in the file. 
+-output <basename> -- The base name for the output files. If not specified, the base name of the first .rec file is used. 
+-outputdirectory <directory> -- A root directory to extract output files to (default is directory of .rec file). 
+-reconfig <filename> -- Use a different workspace than the one embedded in the recording file. 
+-abortbaddata <1 or 0> -- Whether or not to abort export if data appears corrupted. 
+-paddingbytes <integer> -- Used to add extra bytes to the expected packet size if an override is required
+
+--------------------------------------------------------
+exportspikes
+--------------------------------------------------------
+Used to extract spike waveforms from a raw rec file and save to individual files for each nTrode. 
+Usage:  exportspikes -rec INPUTFILENAME OPTION1 VALUE1 OPTION2 VALUE2 ...  
+
+Input arguments 
+Defaults:
+ -invert 1 -outputrate -1 (full sampling, can't be changed') 
+ -usespikefilters 1 
+ -interp 0 
+ -userefs 1 
+
+
+-invert <1 or 0> -- Whether or not to invert spikes to go upward
+
+-rec <filename>  -- Recording filename. Required. Muliple -rec <filename> entries can be used to append data in output.
+-v or -version -- Prints the current executable's version information to the terminal. 
+-highpass <integer> -- High pass filter value. Overrides settings in file. 
+-lowpass <integer> -- Low pass filter value. Overrides settings in file.
+-outputrate <integer> -- Define the output sampling rate in the output file(s).
+-interp <integer> -- Maximum number of dropped packets to interpolate. 
+-userefs <1 or 0> -- Whether or not to subtract digital references.
+-usespikefilters <1 or 0> -- Whether or not to apply the spike filter settings in the file. 
+-output <basename> -- The base name for the output files. If not specified, the base name of the first .rec file is used. 
+-outputdirectory <directory> -- A root directory to extract output files to (default is directory of .rec file). 
+-reconfig <filename> -- Use a different workspace than the one embedded in the recording file. 
+-abortbaddata <1 or 0> -- Whether or not to abort export if data appears corrupted. 
+-paddingbytes <integer> -- Used to add extra bytes to the expected packet size if an override is required
+
+--------------------------------------------------------
+exporttime
+--------------------------------------------------------
+Used to extract continuous time periods from a raw rec file and save to binary file. 
+Usage:  exporttime -rec INPUTFILENAME OPTION1 VALUE1 OPTION2 VALUE2 ...  
+
+Input arguments 
+Defaults:
+ -outputrate -1 (full sampling, can't be changed') 
+ -interp 500 (used to define breaks in continuous periods) 
+
+
+
+-rec <filename>  -- Recording filename. Required. Muliple -rec <filename> entries can be used to append data in output.
+-v or -version -- Prints the current executable's version information to the terminal. 
+-highpass <integer> -- High pass filter value. Overrides settings in file. 
+-lowpass <integer> -- Low pass filter value. Overrides settings in file.
+-outputrate <integer> -- Define the output sampling rate in the output file(s).
+-interp <integer> -- Maximum number of dropped packets to interpolate. 
+-userefs <1 or 0> -- Whether or not to subtract digital references.
+-usespikefilters <1 or 0> -- Whether or not to apply the spike filter settings in the file. 
+-output <basename> -- The base name for the output files. If not specified, the base name of the first .rec file is used. 
+-outputdirectory <directory> -- A root directory to extract output files to (default is directory of .rec file). 
+-reconfig <filename> -- Use a different workspace than the one embedded in the recording file. 
+-abortbaddata <1 or 0> -- Whether or not to abort export if data appears corrupted. 
+-paddingbytes <integer> -- Used to add extra bytes to the expected packet size if an override is required
+
+--------------------------------------------------------
+exportdio
+--------------------------------------------------------
+Used to extract digital I/O channels from a raw rec file and save to individual files for each channel. 
+Usage:  exportdio -rec INPUTFILENAME OPTION1 VALUE1 OPTION2 VALUE2 ...  
+
+Input arguments 
+
+-rec <filename>  -- Recording filename. Required. Muliple -rec <filename> entries can be used to append data in output.
+-v or -version -- Prints the current executable's version information to the terminal. 
+-highpass <integer> -- High pass filter value. Overrides settings in file. 
+-lowpass <integer> -- Low pass filter value. Overrides settings in file.
+-outputrate <integer> -- Define the output sampling rate in the output file(s).
+-interp <integer> -- Maximum number of dropped packets to interpolate. 
+-userefs <1 or 0> -- Whether or not to subtract digital references.
+-usespikefilters <1 or 0> -- Whether or not to apply the spike filter settings in the file. 
+-output <basename> -- The base name for the output files. If not specified, the base name of the first .rec file is used. 
+-outputdirectory <directory> -- A root directory to extract output files to (default is directory of .rec file). 
+-reconfig <filename> -- Use a different workspace than the one embedded in the recording file. 
+-abortbaddata <1 or 0> -- Whether or not to abort export if data appears corrupted. 
+-paddingbytes <integer> -- Used to add extra bytes to the expected packet size if an override is required
+
+--------------------------------------------------------
+exportmda
+--------------------------------------------------------
+Used to extract data from a raw rec file and save to a set of files in MDA format. 
+NOTE: FILTERING IS TURNED OFF. 
+Usage:  exportmda -rec INPUTFILENAME OPTION1 VALUE1 OPTION2 VALUE2 ...  
+
+Input arguments 
+Defaults:
+ -outputrate -1 (full) 
+ -usespikefilters 1 
+ -interp -1 (inf) 
+ -userefs 1 
+
+-rec <filename>  -- Recording filename. Required. Muliple -rec <filename> entries can be used to append data in output.
+-v or -version -- Prints the current executable's version information to the terminal. 
+-highpass <integer> -- High pass filter value. Overrides settings in file. 
+-lowpass <integer> -- Low pass filter value. Overrides settings in file.
+-outputrate <integer> -- Define the output sampling rate in the output file(s).
+-interp <integer> -- Maximum number of dropped packets to interpolate. 
+-userefs <1 or 0> -- Whether or not to subtract digital references.
+-usespikefilters <1 or 0> -- Whether or not to apply the spike filter settings in the file. 
+-output <basename> -- The base name for the output files. If not specified, the base name of the first .rec file is used. 
+-outputdirectory <directory> -- A root directory to extract output files to (default is directory of .rec file). 
+-reconfig <filename> -- Use a different workspace than the one embedded in the recording file. 
+-abortbaddata <1 or 0> -- Whether or not to abort export if data appears corrupted. 
+-paddingbytes <integer> -- Used to add extra bytes to the expected packet size if an override is required
+
+--------------------------------------------------------
+exportphy
+--------------------------------------------------------
+Used to extract data from a raw rec file and save to a file for PHY file format. 
+Usage:  exportPHY -rec INPUTFILENAME OPTION1 VALUE1 OPTION2 VALUE2 ...  
+
+Input arguments 
+Defaults:
+ -outputrate -1 (full) 
+ -usespikefilters 1 
+ -interp -1 (inf) 
+ -userefs 1 
+
+-rec <filename>  -- Recording filename. Required. Muliple -rec <filename> entries can be used to append data in output.
+-v or -version -- Prints the current executable's version information to the terminal. 
+-highpass <integer> -- High pass filter value. Overrides settings in file. 
+-lowpass <integer> -- Low pass filter value. Overrides settings in file.
+-outputrate <integer> -- Define the output sampling rate in the output file(s).
+-interp <integer> -- Maximum number of dropped packets to interpolate. 
+-userefs <1 or 0> -- Whether or not to subtract digital references.
+-usespikefilters <1 or 0> -- Whether or not to apply the spike filter settings in the file. 
+-output <basename> -- The base name for the output files. If not specified, the base name of the first .rec file is used. 
+-outputdirectory <directory> -- A root directory to extract output files to (default is directory of .rec file). 
+-reconfig <filename> -- Use a different workspace than the one embedded in the recording file. 
+-abortbaddata <1 or 0> -- Whether or not to abort export if data appears corrupted. 
+-paddingbytes <integer> -- Used to add extra bytes to the expected packet size if an override is required
+
+
