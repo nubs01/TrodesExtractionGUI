@@ -43,7 +43,7 @@ if nargin<4
         thresh = extractVal(nextline,'thresh','SpikeChannel');
         if ~isempty(id)
             currTrode = find(nTrodes==id);
-            refNTrode(currTrode) = extractVal(nextline,'refNTrode','SpikeNTrode');
+            refNTrode(currTrode) = extractVal(nextline,'refNTrodeID','SpikeNTrode');
             refChan(currTrode) = extractVal(nextline,'refChan','SpikeNTrode');
             lfpChan(currTrode) = extractVal(nextline,'LFPChan','SpikeNTrode');
         elseif ~isempty(thresh)
@@ -56,7 +56,7 @@ end
 
 TrodePrefs = [];
 for i=1:numel(nTrodes),
-    TrodePrefs  = [TrodePrefs struct('id',nTrodes(i),'LFPChan',lfpChan(i),...
+    TrodePrefs  = [TrodePrefs struct('id',nTrodes(i),'lfpChan',lfpChan(i),...
         'refNTrode',refNTrode(i),'refChan',refChan(i),'thresh',spikeThresh(i))];
 end
 TrodePrefs2 = RN_extractionTrodesConfGUI(TrodePrefs);
@@ -77,7 +77,7 @@ while nextline~=-1
         n = find(nTrodes==id);
         outLine = replaceVal(outLine,'LFPChan','SpikeNTrode',TrodePrefs2(n).lfpChan);
         outLine = replaceVal(outLine,'refChan','SpikeNTrode',TrodePrefs2(n).refChan);
-        outLine = replaceVal(outLine,'refNTrode','SpikeNTrode',TrodePrefs2(n).refNTrode);
+        outLine = replaceVal(outLine,'refNTrodeID','SpikeNTrode',TrodePrefs2(n).refNTrode);
     elseif ~isempty(thresh)
         outLine = replaceVal(outLine,'thresh','SpikeChannel',TrodePrefs2(n).thresh);
     end
