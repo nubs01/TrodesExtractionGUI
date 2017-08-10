@@ -109,7 +109,7 @@ end
 %% Run Extraction on each day_directory #BODY
 N = numel(extractionDat);
 logs = cell(1,N);
-for i=1:N,
+for i=1:N
     exd = extractionDat(i);
     cd(exd.day_dir)
     
@@ -138,7 +138,7 @@ for i=1:N,
                 commonFlag = [' -reconfig ' exd.config];
             end
             commonFlag = [' -rec ' strjoin(RO,' -rec ') ...
-                commonFlag ' -output ' fnMask];
+                commonFlag ' -output ' fn_mask];
             exType = allExports{exportIdx(j)};
             disp(['Exporting ' exType '...'])
             RN_exportBinary(exType,...

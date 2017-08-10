@@ -22,3 +22,7 @@ commonStr = A(1:N);
 if strcmp(commonStr(end),'_')
     commonStr = commonStr(1:end-1);
 end
+
+if commonStr(end) == '.'
+    commonStr = commonStr(1:end-1);
+end
