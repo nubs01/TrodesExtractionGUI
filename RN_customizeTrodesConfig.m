@@ -6,6 +6,7 @@ function new_config = RN_customizeTrodesConfig(baseConfig,new_config,nTrodes,spi
 % will be coming eventually. If any fields are empty, existing values will
 % be used. nTrodes should be a list of tetrode id numbers, if empty or left
 % blank, ids will be read from baseConfig
+dataFields = {'id','thresh','refNTrode','refChan','lfpChan'};
 
 if nargin<1
     [baseConfig,configDir] = uigetfile('.trodesconf','Select base config file');
@@ -22,7 +23,7 @@ if isempty(nTrodes)
     fid = fopen(baseConfig);
     nextline = fgets(fid);
     while nextline~=-1
-        id = extractVal(nextline,'id','SpikeNTrode');
+        id = extractVal(nextline,dataFields{1},'SpikeNTrode');
         if ~isempty(id)
             nTrodes = [nTrodes id];
         end
@@ -39,13 +40,19 @@ if nargin<4
     fid = fopen(baseConfig);
     nextline = fgets(fid);
     while nextline~=-1
-        id = extractVal(nextline,'id','SpikeNTrode');
-        thresh = extractVal(nextline,'thresh','SpikeChannel');
+        % Switch Data Fields if using Trodes 1.6 or later
+        trodesVersion = extractVal(nextline,'trodesVersion','GlobalConfiguration');
+        if ~isempty(trodesVersion) && ~isempty(regexp(trodesVersion,'1.6.*'))
+            dataFields = {'id','thresh','refNTrodeID','refChan','LFPChan'};
+        end
+
+        id = extractVal(nextline,dataFields{1},'SpikeNTrode');
+        thresh = extractVal(nextline,dataFields{2},'SpikeChannel');
         if ~isempty(id)
             currTrode = find(nTrodes==id);
-            refNTrode(currTrode) = extractVal(nextline,'refNTrodeID','SpikeNTrode');
-            refChan(currTrode) = extractVal(nextline,'refChan','SpikeNTrode');
-            lfpChan(currTrode) = extractVal(nextline,'LFPChan','SpikeNTrode');
+            refNTrode(currTrode) = extractVal(nextline,dataFields{3},'SpikeNTrode');
+            refChan(currTrode) = extractVal(nextline,dataFields{4},'SpikeNTrode');
+            lfpChan(currTrode) = extractVal(nextline,dataFields{5},'SpikeNTrode');
         elseif ~isempty(thresh)
             spikeThresh(currTrode) = thresh;
         end
@@ -71,22 +78,28 @@ fid2 = fopen(new_config,'w');
 nextline = fgets(fid);
 while nextline~=-1
     outLine = nextline;
-    id = extractVal(nextline,'id','SpikeNTrode');
-    thresh = extractVal(nextline,'thresh','SpikeChannel');
+    % Switch Data Fields if using Trodes 1.6 or later
+    trodesVersion = extractVal(nextline,'trodesVersion','GlobalConfiguration');
+    if ~isempty(trodesVersion) && ~isempty(regexp(trodesVersion,'1.6.*'))
+        dataFields = {'id','thresh','refNTrodeID','refChan','LFPChan'};
+    end
+
+    id = extractVal(nextline,dataFields{1},'SpikeNTrode');
+    thresh = extractVal(nextline,dataFields{2},'SpikeChannel');
     if ~isempty(id)
         n = find(nTrodes==id);
-        outLine = replaceVal(outLine,'LFPChan','SpikeNTrode',TrodePrefs2(n).lfpChan);
-        outLine = replaceVal(outLine,'refChan','SpikeNTrode',TrodePrefs2(n).refChan);
-        outLine = replaceVal(outLine,'refNTrodeID','SpikeNTrode',TrodePrefs2(n).refNTrode);
+        outLine = replaceVal(outLine,dataFields{5},'SpikeNTrode',TrodePrefs2(n).lfpChan);
+        outLine = replaceVal(outLine,dataFields{4},'SpikeNTrode',TrodePrefs2(n).refChan);
+        outLine = replaceVal(outLine,dataFields{3},'SpikeNTrode',TrodePrefs2(n).refNTrode);
     elseif ~isempty(thresh)
-        outLine = replaceVal(outLine,'thresh','SpikeChannel',TrodePrefs2(n).thresh);
+        outLine = replaceVal(outLine,dataFields{2},'SpikeChannel',TrodePrefs2(n).thresh);
     end
     if isempty(outLine)
         disp('Unable to correct config file...Fields to replace do not exist');
         outLine = nextline;
     end
     fprintf(fid2,'%s',outLine);
-    
+
     nextline = fgets(fid);
 end
 fclose(fid);
@@ -101,7 +114,12 @@ if isempty(a) || isempty(b)
 end
 a = a + numel(tag) + 2;
 b = a+find(str(a:end)=='"',1,'first')-2;
-out = str2double(str(a:b));
+str = str(a:b);
+
+out = str2double(str);
+if isnan(out)
+    out = str;
+end
 
 function out = replaceVal(str,tag,lineStart,newVal)
 out = [];
