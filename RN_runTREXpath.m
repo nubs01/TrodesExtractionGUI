@@ -38,12 +38,12 @@ animal_names = {};
 
 for i = 1:numel(selected_dirs),
     selected_dir = selected_dirs{i};
-    
+
     % Check is selected_dir is animal dir or day dir
     if ~strcmp(selected_dir(end),filesep)
         selected_dir = [selected_dir filesep];
     end
-    
+
     recCheck = dir([selected_dir '*.rec']);
     if isempty(recCheck)
         ad = selected_dir;
@@ -112,25 +112,43 @@ logs = cell(1,N);
 for i=1:N
     exd = extractionDat(i);
     cd(exd.day_dir)
-    
+
     % Setup log
-    mkdir([exd.prefix '_Logs/'])
-    logFile = [exd.prefix '_Logs/' exd.day_name '_ExtractionLog.log'];
+    mkdir([exd.prefix '_Logs' filesep])
+    logFile = [exd.prefix '_Logs' filesep exd.day_name '_ExtractionLog.log'];
     diary(logFile)
     tic
     fprintf('Running extraction for animal %s - day %s (%i/%i)',exd.animal_name,exd.day_name,i,N);
-    
+
     fn_mask = exd.prefix;
     RO = exd.rec_order;
     config = exd.config;
 
-    
+
     for j=1:numel(exPath),
         pStep = exPath{j};
-        
+
         % Handle Export
         % #EXPORT
         if exportIdx(j)~=0
+            % Create time reset comments for exportTimes if Trodes Comments don't already exist
+            if strcmp(allExports{exportIdx(j)},'time')
+                tcfs = dir([exd.day_dir filesep '*.trodesComments']);
+                tcfs = {tcfs.name};
+                if isempty(tcfs) || numel(RO) == numel(tcfs)
+                    trfs = ListSelectGUI(RO,'Select Rec Files with Time Resets',1);
+                    for k=1:numel(RO)
+                        if any(trfs<=k)
+                            tmpFN = [exd.day_dir filesep strtok(RO{k},'.') '.trodesComments'];
+                            fid = fopen(tmpFN,'w');
+                            fprintf(fid,'time reset');
+                            fclose(fid);
+                            clear tmpFN
+                        end
+                    end
+                end
+            end
+
             % Make Common Flag
             % #EXPORT
             commonFlag = '';
@@ -140,13 +158,15 @@ for i=1:N
             commonFlag = [' -rec ' strjoin(RO,' -rec ') ...
                 commonFlag ' -output ' fn_mask];
             exType = allExports{exportIdx(j)};
+
+            % Export
             disp(['Exporting ' exType '...'])
             RN_exportBinary(exType,...
                 [commonFlag ' ' exd.export_flags{exportIdx(j)}]);
             disp('Export complete.')
             continue;
         end
-        
+
         switch pStep
             case 'Fix Filenames'
                 % Fix Filenames and Change prefix
@@ -164,6 +184,8 @@ for i=1:N
                 disp('Creating Trodes Comments...')
                 if isrow(RO)
                     RO1 = RO';
+                else
+                    RO1 = RO;
                 end
                 RO1 = strrep(RO1,'.rec','');
                 RN_createTrodesComments(RO1);
