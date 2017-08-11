@@ -135,7 +135,7 @@ for i=1:N
             if strcmp(allExports{exportIdx(j)},'time')
                 tcfs = dir([exd.day_dir filesep '*.trodesComments']);
                 tcfs = {tcfs.name};
-                if isempty(tcfs) || numel(RO) == numel(tcfs)
+                if isempty(tcfs) || numel(RO) ~= numel(tcfs)
                     trfs = ListSelectGUI(RO,'Select Rec Files with Time Resets',1);
                     for k=1:numel(RO)
                         if any(trfs<=k)
