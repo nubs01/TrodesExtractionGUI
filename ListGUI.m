@@ -4,7 +4,7 @@ function varargout = ListGUI(varargin)
 %      the user to sort a list
 %
 %      SortedList = ListGUI(unsortedList,title,addType) sets the title of
-%      the GUI and specifying an addType ('file' or 'string') allows
+%      the GUI and specifying an addType ('dir','dircontent','file', 'string') allows
 %      addition and removal of items from the list
 %
 %      ListGUI, by itself, creates a new ListGUI or raises the existing
@@ -63,6 +63,7 @@ function ListGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 handles.figHandle = hObject;
 handles.output = varargin{1};
 handles.origList = varargin{1};
+handles.unpack = 0;
 updateList(handles);
 
 if numel(varargin)>1
@@ -75,8 +76,11 @@ if numel(varargin)>2
         case 'file'
         case 'string'
         case 'dir'
+        case 'dircontent'
+            add_type = 'dir';
+            handles.unpack = 1;
         otherwise
-            error('add_type must be either ''dir'', ''file'' or ''string''');
+            error('add_type must be either ''dir'', ''dircontent'', ''file'' or ''string''');
     end
     set(handles.add_push,'Visible','On','Enable','On')
     set(handles.remove_push,'Visible','On','Enable','On')
@@ -102,7 +106,7 @@ len = get(handles.list_box,'Position');
 len = len(3)-1;
 sizes = cellfun(@(x) numel(x),list);
 if any(sizes>=len)
-    for i=find(sizes>=len),
+    for i=find(sizes'>=len),
         a = list{i};
         if strcmp(handles.add_type,'file') || strcmp(handles.add_type,'dir')
             b = shortenPath(a,len);
@@ -280,6 +284,17 @@ switch handles.add_type
         direc = uigetdir(pwd,'Select Directory');
         if direc
             txt = direc;
+            if handles.unpack
+                A = dir(direc);
+                if all([A.isdir])
+                    A = {A.name}';
+                    A = A(~cellfun(@isempty,regexp(A,'\w*')));
+                    direc = strcat(direc,filesep);
+                    A = strcat(direc,A);
+                    handles.output = [handles.output;A];
+                    txt ='';
+                end
+            end
         else
             txt = '';
         end

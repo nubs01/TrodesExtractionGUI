@@ -29,7 +29,7 @@ end
 
 
 %% Setup day directories
-selected_dirs = ListGUI([],sprintf('Select Extraction Directories\n(Animal or Day)'),'dir');
+selected_dirs = ListGUI([],sprintf('Select Extraction Directories\n(Animal or Day)'),'dircontent');
 curr_dir = pwd;
 animal_dirs = {};
 day_dirs = {};
