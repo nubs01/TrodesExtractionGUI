@@ -35,6 +35,7 @@ function out = RN_generateMatclusts(mjc)
 	disp('Fixing wave path in param files...')
 	matclustDir = subdir('*.matclust');
 	if numel(matclustDir)==1,
+        pause(5)
 	    fixParamPaths(matclustDir.name);
 	end
 	disp('Done Done Done!!!')
