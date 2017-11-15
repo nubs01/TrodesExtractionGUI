@@ -1,5 +1,6 @@
-function [out] = RN_runTREXpath(exPath)
+function [out] = RN_runTREXpath(exPath,exDat,maxJobs)
 out = '';
+curr_dir = pwd;
 %% Check Path for validity
 [valid,suggested] = RN_checkExPath(exPath);
 if ~valid
@@ -13,7 +14,6 @@ if ~valid
         return;
     end
 end
-
 % Figure out what exports are needed
 [str1,rem] = strtok(exPath,' ');
 allExports = {'spikes','LFP','time','dio','mda','phy'};
@@ -27,83 +27,88 @@ for i=1:numel(tmpIdx),
     end
 end
 
+if ~exist('exDat','var')
+    %% Setup day directories
+    selected_dirs = ListGUI([],sprintf('Select Extraction Directories\n(Animal or Day)'),'dircontent');
+    animal_dirs = {};
+    day_dirs = {};
+    day_names = {};
+    animal_names = {};
 
-%% Setup day directories
-selected_dirs = ListGUI([],sprintf('Select Extraction Directories\n(Animal or Day)'),'dircontent');
-curr_dir = pwd;
-animal_dirs = {};
-day_dirs = {};
-day_names = {};
-animal_names = {};
+    for i = 1:numel(selected_dirs),
+        selected_dir = selected_dirs{i};
 
-for i = 1:numel(selected_dirs),
-    selected_dir = selected_dirs{i};
-
-    % Check is selected_dir is animal dir or day dir
-    if ~strcmp(selected_dir(end),filesep)
-        selected_dir = [selected_dir filesep];
-    end
-
-    recCheck = dir([selected_dir '*.rec']);
-    if isempty(recCheck)
-        ad = selected_dir;
-        dns = dir(selected_dir);
-        dns = dns(cellfun(@(x) ~strcmp(x(1),'.'),{dns.name}));
-        dns = {dns.name}';
-        dds = cellfun(@(x) [ad x],dns,'UniformOutput',0);
-        n = numel(dds);
-        animal_dirs = [animal_dirs;repmat({ad},n,1)];
-        day_dirs = [day_dirs;dds];
-        day_names = [day_names;dns];
-        if ad(end)==filesep
-            ad = ad(1:end-1);
+        % Check is selected_dir is animal dir or day dir
+        if ~strcmp(selected_dir(end),filesep)
+            selected_dir = [selected_dir filesep];
         end
-        [~,an] = fileparts(ad);
-        animal_names = [animal_names;...
-            repmat({an},n,1)];
+
+        recCheck = dir([selected_dir '*.rec']);
+        if isempty(recCheck)
+            ad = selected_dir;
+            dns = dir(selected_dir);
+            dns = dns(cellfun(@(x) ~strcmp(x(1),'.'),{dns.name}));
+            dns = {dns.name}';
+            dds = cellfun(@(x) [ad x],dns,'UniformOutput',0);
+            n = numel(dds);
+            animal_dirs = [animal_dirs;repmat({ad},n,1)];
+            day_dirs = [day_dirs;dds];
+            day_names = [day_names;dns];
+            if ad(end)==filesep
+                ad = ad(1:end-1);
+            end
+            [~,an] = fileparts(ad);
+            animal_names = [animal_names;...
+                repmat({an},n,1)];
+        else
+            day_dirs = [day_dirs;selected_dir];
+            [ad,dns] = fileparts(selected_dir(1:end-1));
+            day_names = [day_names;dns];
+            animal_dirs = [animal_dirs;[ad filesep]];
+            [~,an] = fileparts(ad);
+            animal_names = [animal_names;an];
+        end
+    end
+
+    %% Setup extraction data strcuture
+    emptArr = {repmat([],numel(day_dirs),1)};
+    extractionDat = struct('animal_name',animal_names,'day_dir',day_dirs,...
+        'day_name',day_names,'prefix',emptArr,...
+        'config',emptArr,'rec_order',emptArr,...
+        'export_flags',{repmat([],numel(day_dirs),1)});
+
+    for i=1:numel(day_dirs),
+        dd = extractionDat(i).day_dir;
+        if strcmp(dd(end),filesep)
+            dd = dd(1:end);
+        end
+        RO = dir([dd filesep '*.rec']);
+        [~,idx] = sort([RO.datenum]');
+        RO = {RO(idx).name};
+        extractionDat(i).rec_order = RO;
+        if numel(RO)>1
+            extractionDat(i).prefix = RN_findCommonPrefix(RO);
+        else
+            a = dir([dd filesep '*.*']);
+            a = a(cellfun(@(x) ~strcmp(x(1),'.'),{a.name}));
+            a = {a.name};
+            extractionDat(i).prefix = RN_findCommonPrefix(a);
+        end
+        extractionDat(i).export_flags = repmat({''},1,numel(allExports));
+    end
+
+    %% Gather User Input #INTRO
+    [exDat,maxJobs] = RN_extractionSetupGUI(exPath,extractionDat);
+    if isempty(exDat)
+        return;
     else
-        day_dirs = [day_dirs;selected_dir];
-        [ad,dns] = fileparts(selected_dir(1:end-1));
-        day_names = [day_names;dns];
-        animal_dirs = [animal_dirs;[ad filesep]];
-        [~,an] = fileparts(ad);
-        animal_names = [animal_names;an];
+        extractionDat = exDat;
     end
-end
-
-%% Setup extraction data strcuture
-emptArr = {repmat([],numel(day_dirs),1)};
-extractionDat = struct('animal_name',animal_names,'day_dir',day_dirs,...
-    'day_name',day_names,'prefix',emptArr,...
-    'config',emptArr,'rec_order',emptArr,...
-    'export_flags',{repmat([],numel(day_dirs),1)});
-
-for i=1:numel(day_dirs),
-    dd = extractionDat(i).day_dir;
-    if strcmp(dd(end),filesep)
-        dd = dd(1:end);
-    end
-    RO = dir([dd filesep '*.rec']);
-    [~,idx] = sort([RO.datenum]');
-    RO = {RO(idx).name};
-    extractionDat(i).rec_order = RO;
-    if numel(RO)>1
-        extractionDat(i).prefix = RN_findCommonPrefix(RO);
-    else
-        a = dir([dd filesep '*.*']);
-        a = a(cellfun(@(x) ~strcmp(x(1),'.'),{a.name}));
-        a = {a.name};
-        extractionDat(i).prefix = RN_findCommonPrefix(a);
-    end
-    extractionDat(i).export_flags = repmat({''},1,numel(allExports));
-end
-
-%% Gather User Input #INTRO
-[exDat,maxJobs] = RN_extractionSetupGUI(exPath,extractionDat);
-if isempty(exDat)
-    return;
 else
     extractionDat = exDat;
+    if ~exist('maxJobs','var')
+        maxJobs = 8;
+    end
 end
 
 %% Run Extraction on each day_directory #BODY
