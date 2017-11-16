@@ -22,7 +22,7 @@ function varargout = RN_extractionSetupGUI(varargin)
 
 % Edit the above text to modify the response to help RN_extractionSetupGUI
 
-% Last Modified by GUIDE v2.5 02-Apr-2017 01:31:06
+% Last Modified by GUIDE v2.5 15-Nov-2017 20:31:43
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -143,7 +143,10 @@ for j=1:numel(ExPath),
             if strcmp(a,'Export')
                 set(handles.config_panel,'Visible','On')
                 if ~isempty(ed.config)
-                    set(handles.config_text,'String',['Config: ' ed.config])
+                    confStr = ed.config;
+                    [~,confStr] = fileparts(ed.config);
+                    confStr = ['...' filsep confStr];
+                    set(handles.config_text,'String',['Config: ' confStr])
                 else
                     set(handles.config_text,'String','Config: Default')
                 end
@@ -382,3 +385,68 @@ exDat(i).config = '';
 setappdata(handles.output,'ExDat',exDat)
 updateGUI(handles)
 guidata(hObject,handles)
+
+
+% --- Executes on button press in copyConfig_push.
+function copyConfig_push_Callback(hObject, eventdata, handles)
+% hObject    handle to copyConfig_push (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+i = handles.i;
+exDat = getappdata(handles.output,'ExDat');
+choice = 1:numel(exDat);
+choice = choice(choice~=i);
+choice = cellstr(num2str(choice'));
+
+[s,ok] = listdlg('ListSrting',choice);
+if ~ok
+    return;
+end
+choice = choice(s);
+choice = str2double(choice);
+exDat(choice).config = exDat(i).config;
+
+setappdata(handles.output,'ExDat',exDat)
+updateGUI(handles)
+guidata(hObject,handles)
+
+
+% --------------------------------------------------------------------
+function save_menu_Callback(hObject, eventdata, handles)
+% hObject    handle to save_menu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+appVars = {'ExPath','dayIdx','ExDat','dayList','allExportTypes','origDat'};
+i = handles.i;
+submit = handles.submit;
+for i=1:numel(appVars),
+    eval([appVars{i} ' = getappdata(handles.output,appVars{i});']);
+end
+anim = unique({ExDat.animal_name});
+saveFile = [strjoin(anim,'-') '_ExtractionSetup.mat'];
+[saveFile,savePath] = uiputfile(saveFile,'Save Extraction Setup as...');
+if isempty(saveFile)
+    return;
+end
+saveStr = ['save(' savePath filesep saveFile '''i'',''submit'',''' strjoin(appVars,''',''') ''')'];
+eval(saveStr)
+
+
+
+% --------------------------------------------------------------------
+function load_menu_Callback(hObject, eventdata, handles)
+% hObject    handle to load_menu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+[openFile,openPath] = uigetfile('*.mat','Extraction Setup file to open');
+appVars = {'ExPath','dayIdx','ExDat','dayList','allExportTypes','origDat'};
+load([openPath filesep openFile]);
+for i=1:numel(appVars),
+    eval(['setappdata(handles.output,appVars{i},' appVars{i} ');']);
+end
+handles.i = i;
+handles.submit = 0;
+updateGUI(handles);
+
+guidata(hObject,handles)
+
