@@ -54,7 +54,7 @@ if useVideo
                 endEpoch = endEpoch*clockrate;
                 outStr = char(outStr,sprintf('%0.0f %s',startEpoch,'epoch start'));
                 outStr = char(outStr,sprintf('%0.0f %s',endEpoch,'epoch end'));
-                if isempty(outStr(1,:))
+                if isempty(strtrim(outStr(1,:)))
                     outStr = outStr(2:end,:);
                 end
             end
