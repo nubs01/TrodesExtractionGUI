@@ -145,7 +145,7 @@ for j=1:numel(ExPath),
                 if ~isempty(ed.config)
                     confStr = ed.config;
                     [~,confStr] = fileparts(ed.config);
-                    confStr = ['...' filsep confStr];
+                    confStr = ['...' filesep confStr];
                     set(handles.config_text,'String',['Config: ' confStr])
                 else
                     set(handles.config_text,'String','Config: Default')
